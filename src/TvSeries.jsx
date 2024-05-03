@@ -1,56 +1,45 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useNavigate } from "react-router-dom";
 import NavbarTv from "./NavbarTv";
-
-const API_KEY = "c031317917e2399db20c8146bfb4fa9d";
+import { getTvSeries } from "./redux/actions/movieActions";
+import { useDispatch, useSelector } from "react-redux";
+import { setTvId } from "./redux/reducers/movieReducers";
 
 const TvSeries = () => {
-  const [dataTvSeries, setTvSeries] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [moviesPerPage] = useState(10);
 
-
   const navigate = useNavigate();
 
-  //FEtch Data TV
+  // Fecth Data TV Series
+  const dispatch = useDispatch ()
+  const tvSeries = useSelector((state) => state?.movie?.tvSeries);
+  console.log("tv", tvSeries);
   useEffect(() => {
-    const fetchTvSeries = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setTvSeries(response.data.results);
-      } catch (error) {
-        console.error("Error fetching Data TV series: ", error);
-      }
-    };
-
-    fetchTvSeries();
+    dispatch(getTvSeries());
   }, []);
 
-  
   // Logic for pagination
   const indexOfLastMovie = currentPage * moviesPerPage;
   const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = dataTvSeries.slice(indexOfFirstMovie, indexOfLastMovie);
+  const currentMovies = tvSeries.slice(indexOfFirstMovie, indexOfLastMovie);
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Pengujian token harus ada token
-    useEffect(() => {
-      console.log("localStorage ", localStorage.getItem("token"));
-      if (localStorage.getItem("token") === null) {
-        navigate("/");
-      }
-    }, []);
+  // Pengujian token harus ada token
+  useEffect(() => {
+    console.log("localStorage ", localStorage.getItem("token"));
+    if (localStorage.getItem("token") === null) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <div className="container mx-auto bg-black">
       {/* Navbar */}
-      <NavbarTv/>
+      <NavbarTv />
       {/* TV Series */}
       <div className="pt-20 pb-10">
         <div className=" px-20">
@@ -62,7 +51,8 @@ const TvSeries = () => {
               <div
                 key={tv.id}
                 onClick={() => {
-                  navigate("/detail-tv", { state: { id: tv.id } });
+                  navigate("/detail-tv");
+                  dispatch(setTvId(tv?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >

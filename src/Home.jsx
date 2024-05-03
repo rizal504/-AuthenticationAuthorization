@@ -1,87 +1,51 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Navbar from "./Navbar";
-
-
-const API_KEY = "c031317917e2399db20c8146bfb4fa9d";
+import {
+  getAllMovies,
+  getMoviePopuler,
+  getSegeraTayang,
+  getTvSeries,
+} from "./redux/actions/movieActions";
+import { useDispatch, useSelector } from "react-redux";
+import { setMovieId, setTvId } from "./redux/reducers/movieReducers";
 
 const Home = () => {
-  const [dataFilm, setDataFilm] = useState([]);
-  const [dataFilmPopuler, setFilmPopuler] = useState([]);
-  const [dataSegeraTayang, setSegeraTayang] = useState([]);
-  const [dataTvSeries, setTvSeries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [moviesPerPage] = useState(10);
 
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  
   // Fecth Data Film Sedang Tayang
+  const allMovies = useSelector((state) => state.movie.movies);
   useEffect(() => {
-    const fetchDataFilm = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setDataFilm(response.data.results);
-      } catch (error) {
-        console.error("Error fetching Data movies: ", error);
-      }
-    };
-
-    fetchDataFilm();
+    dispatch(getAllMovies());
   }, []);
 
   // Fecth Data Film Populer
+  const moviePopuler = useSelector((state) => state.movie.movies);
+  // console.log("moviepop", moviePopuler)
   useEffect(() => {
-    const fetchMoviePopuler = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setFilmPopuler(response.data.results);
-      } catch (error) {
-        console.error("Error fetching Data movies: ", error);
-      }
-    };
-
-    fetchMoviePopuler();
+    dispatch(getMoviePopuler());
   }, []);
 
   // Fetch Data Segera Tayang
+  const segeraTayang = useSelector((state) => state.movie.movies);
+  // console.log("movieseg",segeraTayang )
   useEffect(() => {
-    const fetchSegeraTayang = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setSegeraTayang(response.data.results);
-      } catch (error) {
-        console.error("Error fetching Data movies: ", error);
-      }
-    };
-
-    fetchSegeraTayang();
+    dispatch(getSegeraTayang());
   }, []);
 
   // Fecth Data TV Series
+  const tvSeries = useSelector((state) => state?.movie?.tvSeries);
+  console.log("tv", tvSeries);
   useEffect(() => {
-    const fetchTvSeries = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setTvSeries(response.data.results);
-      } catch (error) {
-        console.error("Error fetching Data TV series: ", error);
-      }
-    };
-
-    fetchTvSeries();
+    dispatch(getTvSeries());
   }, []);
 
   // slide Acordion Setting
@@ -96,19 +60,17 @@ const Home = () => {
   // Logic for pagination
   const indexOfLastMovie = currentPage * moviesPerPage;
   const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = dataFilm.slice(indexOfFirstMovie, indexOfLastMovie);
+  const currentMovies = allMovies.slice(indexOfFirstMovie, indexOfLastMovie);
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Pengujian token harus ada token
+  //Pengujian token harus ada token
   useEffect(() => {
     console.log("localStorage ", localStorage.getItem("token"));
     if (localStorage.getItem("token") === null) {
       navigate("/");
     }
   }, []);
-
-
 
   return (
     <div className="container mx-auto bg-black">
@@ -149,7 +111,8 @@ const Home = () => {
                     className="bg-[#FFA500] hover:bg-slate-900 text-white font-bold py-2 px-4 rounded transition duration-300 transform hover:scale-105"
                     key={movie.id}
                     onClick={() => {
-                      navigate("/movie-details", { state: { id: movie.id } });
+                      navigate("/movie-details");
+                      dispatch(setMovieId(movie?.id));
                     }}
                   >
                     Detail Film
@@ -174,7 +137,8 @@ const Home = () => {
               <div
                 key={movie.id}
                 onClick={() => {
-                  navigate("/movie-details", { state: { id: movie.id } });
+                  navigate("/movie-details");
+                  dispatch(setMovieId(movie?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >
@@ -226,11 +190,12 @@ const Home = () => {
             Film Popular
           </p>
           <div className="grid grid-cols-5 gap-5 py-5 px-5">
-            {dataFilmPopuler.slice(0, 10).map((movie) => (
+            {moviePopuler.slice(0, 10).map((movie) => (
               <div
                 key={movie.id}
                 onClick={() => {
-                  navigate("/movie-details", { state: { id: movie.id } });
+                  navigate("/movie-details");
+                  dispatch(setMovieId(movie?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >
@@ -277,11 +242,12 @@ const Home = () => {
             Film Segera Tayang
           </p>
           <div className="grid grid-cols-5 gap-5 py-5 px-5">
-            {dataSegeraTayang.slice(0, 10).map((movie) => (
+            {segeraTayang.slice(0, 10).map((movie) => (
               <div
                 key={movie.id}
                 onClick={() => {
-                  navigate("/movie-details", { state: { id: movie.id } });
+                  navigate("/movie-details");
+                  dispatch(setMovieId(movie?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >
@@ -326,11 +292,12 @@ const Home = () => {
             TV Series
           </p>
           <div className="grid grid-cols-5 gap-5 py-5 px-5">
-            {dataTvSeries.slice(0, 10).map((tv) => (
+            {tvSeries.slice(0, 10).map((tv) => (
               <div
                 key={tv.id}
                 onClick={() => {
-                  navigate("/tv-series-details", { state: { id: tv.id } });
+                  navigate("/detail-tv");
+                  dispatch(setTvId(tv?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >

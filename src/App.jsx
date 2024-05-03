@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, createBrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import CSS for ToastContainer
@@ -15,6 +15,7 @@ import Login from "./LoginPage";
 import RegisterForm from "./Register";
 
 export default function App() {
+
   return (
     <GoogleOAuthProvider clientId="114661423378-rtig0t8dte4speish42bf70ubh557kr7.apps.googleusercontent.com">
       <Router>

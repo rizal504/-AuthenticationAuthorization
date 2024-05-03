@@ -1,54 +1,40 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-
-const API_KEY = "c031317917e2399db20c8146bfb4fa9d";
+import { getSegeraTayang } from "./redux/actions/movieActions";
+import { useDispatch, useSelector } from "react-redux";
+import { setMovieId } from "./redux/reducers/movieReducers";
 
 const SegeraTayang = () => {
-  const [dataSegeraTayang, setSegeraTayang] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [moviesPerPage] = useState(10);
 
   const navigate = useNavigate();
 
+  const dispatch = useDispatch();
+  // Fetch Data Segera Tayang
+  const segeraTayang = useSelector((state) => state.movie.movies);
+  // console.log("movieseg",segeraTayang )
   useEffect(() => {
-    const fetchSegeraTayang = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setSegeraTayang(response.data.results);
-        setLoading(false); // Set loading to false when data is fetched
-      } catch (error) {
-        console.error("Error fetching Data movies: ", error);
-        setLoading(false); // Set loading to false even if there's an error
-      }
-    };
-
-    fetchSegeraTayang();
+    dispatch(getSegeraTayang());
   }, []);
 
   // Logic for pagination
   const indexOfLastMovie = currentPage * moviesPerPage;
   const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = dataSegeraTayang.slice(
-    indexOfFirstMovie,
-    indexOfLastMovie
-  );
+  const currentMovies = segeraTayang.slice(indexOfFirstMovie, indexOfLastMovie);
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Pengujian token harus ada token
-    useEffect(() => {
-      console.log("localStorage ", localStorage.getItem("token"));
-      if (localStorage.getItem("token") === null) {
-        navigate("/");
-      }
-    }, []);
+  // Pengujian token harus ada token
+  useEffect(() => {
+    console.log("localStorage ", localStorage.getItem("token"));
+    if (localStorage.getItem("token") === null) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <div className="container mx-auto bg-black">
@@ -65,7 +51,8 @@ const SegeraTayang = () => {
               <div
                 key={movie.id}
                 onClick={() => {
-                  navigate("/movie-details", { state: { id: movie.id } });
+                  navigate("/movie-details");
+                  dispatch(setMovieId(movie?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >

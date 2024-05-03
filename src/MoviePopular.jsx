@@ -3,41 +3,28 @@ import axios from "axios";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-
-const API_KEY = "c031317917e2399db20c8146bfb4fa9d";
+import { getMoviePopuler } from "./redux/actions/movieActions";
+import { useDispatch, useSelector } from "react-redux";
+import { setMovieId } from "./redux/reducers/movieReducers";
 
 const MoviePopuler = () => {
-  const [dataFilmPopuler, setFilmPopuler] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [moviesPerPage] = useState(10);
 
   const navigate = useNavigate();
 
-  //fetch Movie populer
+  // Fecth Data Film Populer
+  const dispatch = useDispatch();
+  const moviePopuler = useSelector((state) => state.movie.movies);
+  // console.log("moviepop", moviePopuler)
   useEffect(() => {
-    const fetchMoviePopuler = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`
-        );
-        setFilmPopuler(response.data.results);
-        setLoading(false); // Set loading to false when data is fetched
-      } catch (error) {
-        console.error("Error fetching Data movies: ", error);
-        setLoading(false); // Set loading to false even if there's an error
-      }
-    };
-
-    fetchMoviePopuler();
+    dispatch(getMoviePopuler());
   }, []);
 
   // Logic for pagination
   const indexOfLastMovie = currentPage * moviesPerPage;
   const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = dataFilmPopuler.slice(
-    indexOfFirstMovie,
-    indexOfLastMovie
-  );
+  const currentMovies = moviePopuler.slice(indexOfFirstMovie, indexOfLastMovie);
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -65,7 +52,8 @@ const MoviePopuler = () => {
               <div
                 key={movie.id}
                 onClick={() => {
-                  navigate("/movie-details", { state: { id: movie.id } });
+                  navigate("/movie-details");
+                  dispatch(setMovieId(movie?.id));
                 }}
                 className="relative bg-white shadow-xl rounded-xl overflow-hidden transition duration-300 transform hover:scale-105"
               >

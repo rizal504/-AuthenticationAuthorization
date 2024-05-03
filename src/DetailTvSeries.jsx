@@ -1,74 +1,63 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect} from "react";
 import { StarIcon } from "@heroicons/react/20/solid";
+import { getDetailTvSeries } from "./redux/actions/movieActions";
+import { useDispatch, useSelector } from "react-redux";
 
-const API_KEY = "c031317917e2399db20c8146bfb4fa9d";
 
 const DetailTvSeries = () => {
-  const navigate = useNavigate();
-  let location = useLocation();
-  const [detail, setDetail] = useState([]);
-  const detailMovies = async () => {
-    try {
-      const response = await axios.get(
-        `https://api.themoviedb.org/3/tv/${location.state.id}?language=en-US&api_key=${API_KEY}`, // <-- diganti pake usestate
-        { header: { accept: "application/json" } }
-      );
-      console.log("response data ", response.data);
-      setDetail(response.data);
-    } catch (err) {
-      console.log("error fetching data: ", err);
-    }
-  };
+
+  const dispatch = useDispatch();
+  const id = useSelector((state) => state.movie.tvId);
+  const detailTvSeries = useSelector((state) => state.movie.detailTvSeries.data);
+  console.log("Tvserrrrr", detailTvSeries);
 
   useEffect(() => {
-    console.log("location ", location);
-    detailMovies();
+    dispatch(getDetailTvSeries(id));
   }, []);
+
   return (
     <div>
       <div
         className="bg-cover bg-fixed bg-no-repeat bg-gray-800 bg-blend-multiply h-[720px]"
         style={{
-          backgroundImage: `url(https://image.tmdb.org/t/p/w500/${detail?.backdrop_path})`,
+          backgroundImage: `url(https://image.tmdb.org/t/p/w500/${detailTvSeries?.backdrop_path})`,
         }}
       >
         <div className="flex justify-center container mx-auto py-28 px-10 gap-10 items-center backdrop-blur-sm">
           <img
-            src={`https://image.tmdb.org/t/p/w500/${detail?.poster_path}`}
-            alt={detail?.title}
+            src={`https://image.tmdb.org/t/p/w500/${detailTvSeries?.poster_path}`}
+            alt={detailTvSeries?.title}
             className="h-[500px]  rounded-lg"
           />
-          <div className="text-white font-sans " key={detail?.id}>
+          <div className="text-white font-sans " key={detailTvSeries?.id}>
             <div className="p-4">
-              <h2 className="text-3xl font-semibold mb-2">{detail?.name}</h2>
+              <h2 className="text-3xl font-semibold mb-2">{detailTvSeries?.name}</h2>
               <p className="text-lg">
                 <StarIcon className="w-5 h-5 inline text-yellow-400" />{" "}
-                {parseFloat(detail?.vote_average).toFixed(1)}/ 10
+                {parseFloat(detailTvSeries?.vote_average).toFixed(1)}/ 10
               </p>
               <p className="text-lg mb-2 border-b-2 pb-3 text-justify">
-                {detail?.overview}
+                {detailTvSeries?.overview}
               </p>
-              <p className="text-lg">Status : {detail?.status}</p>
-              <p className="text-lg">Votes : {detail?.vote_count}</p>
-              <p className="text-lg">Data Realese : {detail?.first_air_date}</p>
+              <p className="text-lg">Status : {detailTvSeries?.status}</p>
+              <p className="text-lg">Votes : {detailTvSeries?.vote_count}</p>
+              <p className="text-lg">Data Realese : {detailTvSeries?.first_air_date}</p>
               <p className="text-lg">
                 production_countries :{" "}
-                {detail?.production_countries
+                {detailTvSeries?.production_countries
                   ?.map((countries) => countries.name)
                   .join(", ")}
               </p>
               <p className="text-lg">
                 production_companies :{" "}
-                {detail?.production_companies
+                {detailTvSeries?.production_companies
                   ?.map((produksi) => produksi.name)
                   .join(", ")}
               </p>
               <br />
               <p className="text-lg font-bold ">Genres :</p>
               <div className="flex gap-5">
-                {detail?.genres?.map((genre) => (
+                {detailTvSeries?.genres?.map((genre) => (
                   <div className="p-2 border rounded text-black bg-[#FFA500] font-semibold">
                     <p>{genre.name}</p>
                   </div>
@@ -77,7 +66,7 @@ const DetailTvSeries = () => {
               {/* <button
                 className="mt-7 px-4 py-2  font-sans bg-white border border-solid border-gray-400 text-black rounded-md shadow-md hover:bg-gray-00 hover:border-gray-500 focus:outline-none focus:ring focus:ring-gray-300"
                 onClick={() => {
-                  navigate("/tv-series", { state: { id: detail?.id } });
+                  navigate("/tv-series", { state: { id: DetailTvSeries?.id } });
                 }}
               >
                 <div className="w-5 h-5 ">
